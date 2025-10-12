@@ -40,7 +40,6 @@ flowchart LR
   App -->|Optional HTTPS | CloudAPI[Cloud Sync API]
   CloudAPI -->|Store| CloudDB[(Cloud Maps/Logs)]
   Dev[Dev/CI] -.->|Push model update| Repo[(Model/Code repo)]
-  Note[Trust boundary: Device / Cloud]:::boundary
   classDef boundary fill:#f6f6f6,stroke:#999,stroke-width:1px;
 ```
 
