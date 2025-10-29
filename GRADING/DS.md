@@ -8,26 +8,39 @@
 
 ## 0) Мета
 
-- **Проект (опционально BYO):** TODO: ссылка / «учебный шаблон»
-- **Версия (commit/date):** TODO: abc123 / YYYY-MM-DD
-- **Кратко (1-2 предложения):** TODO: что сканируется и какие меры харднинга планируются
+- **Проект (опционально BYO):** учебный шаблон (https://github.com/ilyaderezovskiy/secdev-seed-s09-s12)
+- **Версия (commit/date):** 1.0.0 / 2025-10-27
+- **Кратко (1-2 предложения):** SAST, Secrets, SCA, SBOM и пассивный DAST для проверки кода, зависимостей и базовых security headers
 
 ---
 
 ## 1) SBOM и уязвимости зависимостей (DS1)
 
-- **Инструмент/формат:** TODO: Syft/Grype/OSV; CycloneDX/SPDX
+- **Инструмент/формат:** Syft/Grype; CycloneDX JSON
 - **Как запускал:**
 
   ```bash
-  syft dir:. -o cyclonedx-json > EVIDENCE/sbom-YYYY-MM-DD.json
-  grype sbom:EVIDENCE/sbom-YYYY-MM-DD.json --fail-on high -o json > EVIDENCE/deps-YYYY-MM-DD.json
+  syft dir:. -o cyclonedx-json > EVIDENCE/S09/sbom.json
+  grype sbom:/work/EVIDENCE/S09/sbom.json --fail-on high -o json > EVIDENCE/S09/sca_report.json
   ```
 
-- **Отчёты:** `EVIDENCE/sbom-YYYY-MM-DD.json`, `EVIDENCE/deps-YYYY-MM-DD.json`
-- **Выводы (кратко):** TODO: сколько Critical/High, ключевые пакеты/лицензии
-- **Действия:** TODO: что исправлено/обновлено **или** что временно подавлено (ниже в триаже)
-- **Гейт по зависимостям:** TODO: правило в словах (например, «Critical=0; High≤1»)
+- **Отчёты:** [`EVIDENCE/09/sbom.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S09/sbom.json), [`EVIDENCE/09/sca_report.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S09/sca_report.json), [`EVIDENCE/09/sca_summary.md`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S09/sca_summary.md)
+- **Actions:** [ссылка на успешный job](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/actions/runs/18783223550)
+- **Выводы (кратко):** 
+  - Найдено: 0 Critical, 0 High, 3 Medium уязвимостей
+  - Состояние: отсутствуют критические и высокие уязвимости
+- **Действия:** Обновить версию Jinja2 в [requirements.txt](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/blob/main/requirements.txt)
+  
+   ```bash
+  jinja2==3.1.4 -> jinja2==3.1.6
+  ```
+- **Выводы после исправления (кратко):** 
+  - Найдено: 0 уязвимостей
+  - Состояние: отсутствуют
+  - [`EVIDENCE/09/sca_summary_after.md`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S09/sca_summary_after.md)
+  - [ссылка на успешный job](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/actions/runs/18794105977)
+
+- **Гейт по зависимостям:** Critical=0; High=0
 
 ---
 
@@ -35,28 +48,35 @@
 
 ### 2.1 SAST
 
-- **Инструмент/профиль:** TODO: semgrep?
+- **Инструмент/профиль:** semgrep
 - **Как запускал:**
 
   ```bash
-  semgrep --config p/ci --severity=high --error --json --output EVIDENCE/sast-YYYY-MM-DD.json
+  semgrep --config auto --sarif --output EVIDENCE/S10/semgrep.sarif
   ```
 
-- **Отчёт:** `EVIDENCE/sast-YYYY-MM-DD.*`
-- **Выводы:** TODO: 1-2 ключевых находки (TP/FP), области риска
+- **Actions:** [ссылка на успешный job](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/actions/runs/18783590408)
+- **Отчёт:** [`EVIDENCE/S10/semgrep.sarif`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S10/semgrep.sarif)
+- **Выводы:** 
+  - Результат: 0 предупреждений - код не содержит выявляемых статических уязвимостей
+  - Качество кода соответствует стандартам безопасности по проверяемым правилам
+  - Ложные срабатывания отсутствуют
 
 ### 2.2 Secrets scanning
 
-- **Инструмент:** TODO: gitleaks?
+- **Инструмент:** gitleaks
 - **Как запускал:**
 
   ```bash
-  gitleaks detect --no-git --report-format json --report-path EVIDENCE/secrets-YYYY-MM-DD.json
-  gitleaks detect --log-opts="--all" --report-format json --report-path EVIDENCE/secrets-YYYY-MM-DD-history.json
+  gitleaks detect --no-git --report-format json --report-path EVIDENCE/S10/gitleaks.json
+  gitleaks detect --log-opts="--all" --report-format json --report-path EVIDENCE/S10/gitleaks-history.json
   ```
 
-- **Отчёт:** `EVIDENCE/secrets-YYYY-MM-DD.*`
-- **Выводы:** TODO: есть ли истинные срабатывания; меры (ревок/ротация/очистка истории)
+- **Actions:** [ссылка на успешный job](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/actions/runs/18783590408)
+- **Отчёт:** [`EVIDENCE/S10/gitleaks.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S10/gitleaks.json)
+- **Выводы:** 
+  - Результат: 0 находок - в коде и истории коммитов не обнаружено секретов
+  - Меры: дополнительные действия не требуются, состояние соответствует политике безопасности
 
 ---
 
@@ -66,30 +86,143 @@
 
 ### Вариант A - DAST (лайт)
 
-- **Инструмент/таргет:** TODO (локальный стенд/демо-контейнер допустим)
+- **Инструмент/таргет:** zap
 - **Как запускал:**
 
   ```bash
   zap-baseline.py -t http://127.0.0.1:8080 -m 3 \
-    -r EVIDENCE/dast-YYYY-MM-DD.html -J EVIDENCE/dast-YYYY-MM-DD.json
+    -r EVIDENCE/S11/zap_baseline.html -J EVIDENCE/S11/zap_baseline.json
+  ```
+  
+- **Отчёт:** [`EVIDENCE/S11/zap_baseline.html`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/zap_baseline.html), [`EVIDENCE/S11/zap_baseline.json-d.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/zap_baseline.json-d.json)
+- **Выводы:** 
+
+  1. **Проблема:** Missing Anti-clickjacking Header (Medium ×4)
+  
+  **Риск:** Возможность встраивания приложения во фреймы на вредоносных сайтах
+
+  **Детали:** Отсутствуют заголовки X-Frame-Options и Content-Security-Policy с директивой frame-ancestors
+
+  **Решение:** В [main.py](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/blob/main/app/main.py) добавлены security headers middleware
+
+  ```bash
+  class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        
+        # Security headers
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), location=()"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        
+        # Cache control for sensitive endpoints
+        if request.url.path in ["/", "/echo", "/?q="]:
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        
+        return response
   ```
 
-- **Отчёт:** `EVIDENCE/dast-YYYY-MM-DD.pdf#alert-...`
-- **Выводы:** TODO: 1-2 meaningful наблюдения
+ **Отчёт после изменений:** [`EVIDENCE/S11/zap_baseline_after.html`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/zap_baseline_after.html), [`EVIDENCE/S11/zap_baseline_after.json-d.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/zap_baseline_after.json-d.json)
+  
+  **Результат:**
+  
+  - Исчезли: Clickjacking, X-Content-Type, основные CSP ошибки
+  
+  - Появилось: "Non-Storable Content" - значит cache-control заголовки работают
+  
+  - Риски снижены: с 8 предупреждений до 3
+
+  2. **Проблема:** User Controllable HTML Element Attribute (Informational ×1)
+  
+  **Риск:** Возможность внедрения скриптов через параметр 'q'
+
+  **Детали:** Пользовательский ввод напрямую попадает в value атрибут input элемента
+
+  **Пример:** http://localhost:8080/?q=ZAP -> `<input value="zap">`
+
+  - Content Security Policy не настроен (Medium ×4)
+  - X-Content-Type-Options отсутствует (Low ×5)
+  - Кэширование чувствительного контента (Informational ×8)
 
 ### Вариант B - Policy / Container / IaC
 
-- **Инструмент(ы):** TODO (trivy config / checkov / conftest и т.п.)
+- **Инструмент(ы):** checkov
 - **Как запускал:**
 
   ```bash
-  trivy image --severity HIGH,CRITICAL --exit-code 1 <image:tag> > EVIDENCE/policy-YYYY-MM-DD.txt
-  trivy config . --severity HIGH,CRITICAL --exit-code 1 --format table > EVIDENCE/trivy-YYYY-MM-DD.txt
-  checkov -d . -o cli > EVIDENCE/checkov-YYYY-MM-DD.txt
+  checkov -d . -o cli > EVIDENCE/S12/checkov.json
   ```
 
-- **Отчёт(ы):** `EVIDENCE/policy-YYYY-MM-DD.txt`, `EVIDENCE/trivy-YYYY-MM-DD.txt`, …
-- **Выводы:** TODO: какие правила нарушены/исправлены
+- **Отчёт(ы):** [`EVIDENCE/S12/checkov.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/checkov.json), [`EVIDENCE/S12/hadolint.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/hadolint.json)
+- **Выводы:**
+  - НЕ ПРОЙДЕНО: 17 проверок
+  - Наиболее критичны запуск от root, отсутствие ограничений ресурсов и health checks
+
+- **Исправления:**
+  1. Запуск от non-root пользователя
+     
+  Было: runAsUser: 0 (root)
+  
+  Стало: runAsUser: 1001 + runAsNonRoot: true
+  
+  Эффект: Устранен риск привилегированной эксплуатации контейнера
+
+  3. Использование фиксированного тега образа
+  
+  Было: s09s12-app:latest
+
+  Стало: s09s12-app:v1.2.3
+
+  Эффект: Гарантирована воспроизводимость и предотвращены неожиданные обновления
+
+  4. Блокировка эскалации привилегий
+  
+  Было: Не указано (разрешено по умолчанию)
+
+  Стало: allowPrivilegeEscalation: false
+
+  Эффект: Заблокированы попытки повышения привилегий внутри контейнера
+
+  5. Удаление Linux capabilities
+  
+  Было: Все capabilities доступны
+
+  Стало: capabilities: drop: ["ALL"]
+
+  Эффект: Радикальное сокращение поверхности атаки
+
+  6. Включение seccomp профиля
+  
+  Было: Не указано
+
+  Стало: seccompProfile: type: RuntimeDefault
+
+  Эффект: Ограничение системных вызовов на уровне ядра
+
+  7. Установка лимитов ресурсов
+  
+  Было: resources: {} (без ограничений)
+
+  Стало: Четко определенные requests/limits
+
+  - CPU: requests 100m, limits 200m
+
+  - Memory: requests 64Mi, limits 128Mi
+
+  Эффект: Предотвращение истощения ресурсов узла и обеспечение стабильности
+
+- **Выводы после исправления:**
+  - Все проверки пройдены успешно - из 82 проверок безопасности для Kubernetes 82 PASSED, 0 FAILED. Все критически важные аспекты защищены: изоляция, ограничение прав, управление ресурсами и безопасность образов.
+ 
+- **Отчёт(ы) после исправления:** [`EVIDENCE/S12/checkov_after.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/checkov_after.json), [`EVIDENCE/S12/hadolint_after.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/hadolint_after.json)
+
+- **Actions:** [ссылка на успешный job](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/actions/runs/18794221901)
 
 ---
 
@@ -97,13 +230,14 @@
 
 Отметьте **реально применённые** меры, приложите доказательства из `EVIDENCE/`.
 
-- [ ] **Контейнер non-root / drop capabilities** → Evidence: `EVIDENCE/policy-YYYY-MM-DD.txt#no-root`
+- [x] **Контейнер non-root / drop capabilities** → Evidence: [`EVIDENCE/S12/non-root_IaC.txt`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/non-root_IaC.txt)
 - [ ] **Rate-limit / timeouts / retry budget** → Evidence: `EVIDENCE/load-after.png`
-- [ ] **Input validation** (типы/длины/allowlist) → Evidence: `EVIDENCE/sast-YYYY-MM-DD.*#input`
-- [ ] **Secrets handling** (нет секретов в git; хранилище секретов) → Evidence: `EVIDENCE/secrets-YYYY-MM-DD.*`
-- [ ] **HTTP security headers / CSP / HTTPS-only** → Evidence: `EVIDENCE/security-headers.txt`
+- [x] **Input validation** (типы/длины/allowlist) → Evidence: [`EVIDENCE/S11/input-validation.txt`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/input-validation.txt)
+- [x] **Secrets handling** (нет секретов в git; хранилище секретов) → Evidence: [`EVIDENCE/S10/gitleaks.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S10/gitleaks.json), [`EVIDENCE/S10/semgrep.sarif
+`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S10/semgrep.sarif)
+- [x] **HTTP security headers / CSP / HTTPS-only** → Evidence: [`EVIDENCE/S11/secrets_handling.txt`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/security-headers.txt)
 - [ ] **AuthZ / RLS / tenant isolation** → Evidence: `EVIDENCE/rls-policy.txt`
-- [ ] **Container/IaC best-practice** (минимальная база, readonly fs, …) → Evidence: `EVIDENCE/trivy-YYYY-MM-DD.txt#cfg`
+- [x] **Container/IaC best-practice** (минимальная база, readonly fs, …) → [`EVIDENCE/S12/non-root_IaC.txt`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/non-root_IaC.txt)
 
 > Для «1» достаточно ≥2 уместных мер с доказательствами; для «2» - ≥3 и хотя бы по одной показать эффект «до/после».
 
@@ -112,37 +246,55 @@
 ## 5) Quality-gates и проверка порогов (DS5)
 
 - **Пороговые правила (словами):**  
-  Примеры: «SCA: Critical=0; High≤1», «SAST: Critical=0», «Secrets: 0 истинных находок», «Policy: Violations=0».
+
+  - SCA: Critical=0; High≤1; Medium≤3
+  - SAST: Critical=0; High=0
+  - Secrets: Gitleaks length=0
+  - DAST: Critical=0; High=0; Medium≤2
+  - Policy/IaC: Critical=0; High=0
+ 
 - **Как проверяются:**  
-  - Ручной просмотр (какие файлы/строки) **или**  
-  - Автоматически:  (скрипт/job, условие fail при нарушении)
+  Ручной просмотр:
+    
+  - SCA: EVIDENCE/S09/sca_summary_after.md - просмотр severity counts
+  - SAST: EVIDENCE/S10/semgrep.sarif - проверка массива results
+  - Secrets: EVIDENCE/S10/gitleaks.json - проверка пустого массива
+  - DAST: EVIDENCE/S11/zap_baseline_after.html - таблица Summary of Alerts
+  - Policy/IaC: EVIDENCE/S12/checkov_after.json - проверка failed_checks
+    
+  Автоматически:  (скрипт/job, условие fail при нарушении)
 
     ```bash
-    SCA: grype ... --fail-on high
-    SAST: semgrep --config p/ci --severity=high --error
-    Secrets: gitleaks detect --exit-code 1
-    Policy/IaC: trivy (image|config) --severity HIGH,CRITICAL --exit-code 1
-    DAST: zap-baseline.py -m 3 (фейл при High)
+    # SCA
+    grype sbom:EVIDENCE/S09/sbom.json --fail-on high -o json
+
+    # SAST  
+    semgrep --config p/ci --severity=high --error --json
+    
+    # Secrets
+    gitleaks detect --no-git --exit-code 1 --report-format json
+    
+    # DAST
+    zap-baseline.py -t http://localhost:8080 -m 3 -I  # Fail on High
+    
+    # Policy/IaC
+    checkov --directory . --framework terraform --fail-on HIGH
     ```
 
 - **Ссылки на конфиг/скрипт (если есть):**
 
-  ```bash
-  GitHub Actions: .github/workflows/security.yml (jobs: sca, sast, secrets, policy, dast)
-  или GitLab CI: .gitlab-ci.yml (stages: security; jobs: sca/sast/secrets/policy/dast)
-  ```
+  Пороговые проверки встроены в GitHub Actions workflow проекта, выполняются вручную/при пуше/на PR [.github/workflows](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/tree/main/.github/workflows)
 
 ---
 
 ## 6) Триаж-лог (fixed / suppressed / open)
 
-| ID/Anchor       | Класс     | Severity | Статус     | Действие | Evidence                               | Ссылка на фикс/исключение         | Комментарий / owner / expiry |
-|-----------------|-----------|----------|------------|----------|----------------------------------------|-----------------------------------|------------------------------|
-| CVE-2024-XXXX   | SCA       | High     | fixed      | bump     | `EVIDENCE/deps-YYYY-MM-DD.json#CVE`    | `commit abc123`                   | -                            |
-| ZAP-123         | DAST      | Medium   | suppressed | ignore   | `EVIDENCE/dast-YYYY-MM-DD.pdf#123`     | `EVIDENCE/suppressions.yml#zap`   | FP; owner: ФИО; expiry: 2025-12-31 |
-| SAST-77         | SAST      | High     | open       | backlog  | `EVIDENCE/sast-YYYY-MM-DD.*#77`        | issue-link                        | план фикса в релизе N        |
-
-> Для «2» по DS5 обязательно указывать **owner/expiry/обоснование** для подавлений.
+| Класс     | Severity | Статус     | Действие | Evidence                               | Ссылка на фикс/исключение         | Комментарий / owner / expiry |
+|-----------|----------|------------|----------|----------------------------------------|-----------------------------------|------------------------------|
+| SCA       | Medium     | fixed      | bump     | [`EVIDENCE/S09/sca_summary_after.md`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S09/sca_summary_after.md)     | [requirements.txt](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/blob/main/requirements.txt) | Обновление для sandbox escape фикса, attr filter bypass исправлен |
+| DAST      | Medium   | fixed | security headers   | [`EVIDENCE/S11/zap_baseline_after.html`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/zap_baseline_after.html), [`EVIDENCE/S11/secrets_handling.txt`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/security-headers.txt) | [app/main.py](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/blob/main/app/main.py) | Добавлен CSP header, добавлен X-Frame-Options: DENY |
+| SAST      | Medium | fixed | input validation  | [`EVIDENCE/S11/zap_baseline_after.html`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/zap_baseline_after.html), [`EVIDENCE/S11/input-validation.txt`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/input-validation.txt) | [app/main.py](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/blob/main/app/main.py) | Экранирование пользовательского ввода |
+| Policy/IaC      | Medium | fixed | hardening | [`EVIDENCE/S12/checkov_after.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/checkov_after.json), [`EVIDENCE/S12/non-root_IaC.txt`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/non-root_IaC.txt) | [k8s/deploy.yaml](https://github.com/ilyaderezovskiy/secdev-seed-s09-s12/blob/main/iac/k8s/deploy.yaml) | Добавлен non-root, dropped caps |
 
 ---
 
@@ -150,32 +302,76 @@
 
 | Контроль/Мера | Метрика                 | До   | После | Evidence (до), (после)                          |
 |---------------|-------------------------|-----:|------:|-------------------------------------------------|
-| Зависимости   | #Critical / #High (SCA) | TODO | 0 / ≤1| `EVIDENCE/deps-before.json`, `deps-after.json`  |
-| SAST          | #Critical / #High       | TODO | 0 / ≤1| `EVIDENCE/sast-before.*`, `sast-after.*`        |
-| Secrets       | Истинные находки        | TODO | 0     | `EVIDENCE/secrets-*.json`                       |
-| Policy/IaC    | Violations              | TODO | 0     | `EVIDENCE/checkov-before.txt`, `checkov-after.txt` |
+| Зависимости   | #Critical / #High / #Medium (SCA) | 0 / 0 / 3 | 0 / 0 / 0 | [`EVIDENCE/S09/sca_summary.md`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S09/sca_summary.md), [`EVIDENCE/S09/sca_summary_after.md`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S09/sca_summary_after.md)  |
+| SAST          | #Low       | 19 | 10 | [`EVIDENCE/S11/zap_baseline.html`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/zap_baseline.html), [`EVIDENCE/S11/zap_baseline_after.html`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S11/zap_baseline_after.html)        |
+| Secrets       | Истинные находки        | 0 | 0     | [`EVIDENCE/S10/gitleaks.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S10/gitleaks.json)                       |
+| Policy/IaC    | Violations              | 17 | 0     | [`EVIDENCE/S12/checkov.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/checkov.json), [`EVIDENCE/S12/checkov_after.json`](https://github.com/ilyaderezovskiy/secdev-lite-derezovskiy/blob/main/EVIDENCE/S12/checkov_after.json) |
 
 ---
 
 ## 8) Связь с TM и DV (сквозная нитка)
 
-- **Закрываемые угрозы из TM:** TODO: T-001, T-005, … (ссылки на таблицу трассировки TM)
-- **Связь с DV:** TODO: какие сканы/проверки встроены или будут встраиваться в pipeline
+- **Закрываемые угрозы из TM:**
+  
+  **1. T04: SQL-инъекция/ошибки валидации (R-04) - ЗАКРЫТА**
+
+  Что уже есть:
+  - В коде используются параметризованные запросы через ORM/SQLAlchemy
+  - Есть тесты на SQL-инъекции в tests/
+  - Pydantic валидация входных данных
+  - Все тесты проходят (18/18 в CI)
+  
+  **2. T02: Утечка PII в логах/ошибках (R-02) - ЧАСТИЧНО ЗАКРЫТА**
+
+  Что уже есть:
+  - Pre-commit hooks проверяют секреты в коде
+  - CI secrets scanning (grep-secrets.txt)
+  - Маскирование секретов в логах CI (::add-mask::)
+  
+  **3. T01: Кража/повторное использование JWT-токена - ЧАСТИЧНО ЗАКРЫТА**
+
+  Что уже есть:
+  - Secrets management в CI (переменные окружения)
+  - Проверка отсутствия секретов в коде
+  
+  Что нужно добавить:
+  - Специфичные проверки JWT конфигурации
+  - Тесты на TTL токенов
+
+- **Связь с DV:** Уже встроенные проверки:
+  
+  **-   Pre-commit hooks (DV5)**
+    1.   Проверка секретов в коде
+    2.   Форматирование и линтинг
+  **-   Secrets scanning в CI (DV3)**
+
+  ```bash
+  yaml
+  - name: Security scan for secrets
+    run: |
+      git grep -nE 'AKIA|SECRET|api[_-]?key|token=|password=' > EVIDENCE/grep-secrets.txt || true
+  ```
+
+  **-   Security tests в pytest (DV3)**
+    1.   Тесты на XSS, SQL-инъекции
+    2.   Проверки авторизации/аутентификации
 
 ---
 
 ## 9) Out-of-Scope
 
-- TODO: что сознательно не сканировалось сейчас и почему (1-3 пункта)
+**Что сознательно не сканировалось сейчас и почему (1-3 пункта):**
+- Active DAST (риск нарушения работы тестового окружения)
+- Infrastructure as Code (полное IaC сканирование требует реальной инфраструктуры)
 
 ---
 
 ## 10) Самооценка по рубрике DS (0/1/2)
 
-- **DS1. SBOM и SCA:** [ ] 0 [ ] 1 [ ] 2  
-- **DS2. SAST + Secrets:** [ ] 0 [ ] 1 [ ] 2  
-- **DS3. DAST или Policy (Container/IaC):** [ ] 0 [ ] 1 [ ] 2  
-- **DS4. Харднинг (доказуемый):** [ ] 0 [ ] 1 [ ] 2  
-- **DS5. Quality-gates, триаж и «до/после»:** [ ] 0 [ ] 1 [ ] 2  
+- **DS1. SBOM и SCA:** [ ] 0 [ ] 1 [+] 2  
+- **DS2. SAST + Secrets:** [ ] 0 [ ] 1 [+] 2  
+- **DS3. DAST или Policy (Container/IaC):** [ ] 0 [ ] 1 [+] 2  
+- **DS4. Харднинг (доказуемый):** [ ] 0 [ ] 1 [+] 2  
+- **DS5. Quality-gates, триаж и «до/после»:** [ ] 0 [ ] 1 [+] 2  
 
 **Итог DS (сумма):** __/10
